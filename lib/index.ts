@@ -57,6 +57,7 @@ async function getBrowser(
   browserbaseSessionCreateParams?: Browserbase.Sessions.SessionCreateParams,
   browserbaseSessionID?: string,
   localBrowserLaunchOptions?: LocalBrowserLaunchOptions,
+  cdpUrl?: string,
 ): Promise<BrowserResult> {
   if (env === "BROWSERBASE") {
     if (!apiKey) {
@@ -204,6 +205,12 @@ async function getBrowser(
     const context = browser.contexts()[0];
 
     return { browser, context, debugUrl, sessionUrl, sessionId, env };
+  } else if (cdpUrl) {
+    const browser = await chromium.connectOverCDP(cdpUrl);
+    const context = browser.contexts()[0];
+    await applyStealthScripts(context);
+
+    return { context, contextPath: undefined, env: "LOCAL" };
   } else {
     logger({
       category: "init",
@@ -380,6 +387,7 @@ export class Stagehand {
   public readonly waitForCaptchaSolves: boolean;
   private localBrowserLaunchOptions?: LocalBrowserLaunchOptions;
   public readonly selfHeal: boolean;
+  private readonly cdpUrl?: string;
   private cleanupCalled = false;
   public readonly actTimeoutMs: number;
 
@@ -416,6 +424,7 @@ export class Stagehand {
       systemPrompt,
       useAPI,
       localBrowserLaunchOptions,
+      cdpUrl,
       selfHeal = true,
       waitForCaptchaSolves = false,
       actTimeoutMs = 60_000,
@@ -455,6 +464,7 @@ export class Stagehand {
     this.userProvidedInstructions = systemPrompt;
     this.usingAPI = useAPI ?? false;
     this.modelName = modelName ?? DEFAULT_MODEL_NAME;
+    this.cdpUrl = cdpUrl;
     this.actTimeoutMs = actTimeoutMs;
 
     if (this.usingAPI && env === "LOCAL") {

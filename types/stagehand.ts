@@ -41,6 +41,7 @@ export interface ConstructorParams {
    */
   waitForCaptchaSolves?: boolean;
   localBrowserLaunchOptions?: LocalBrowserLaunchOptions;
+  cdpUrl?: string;
   actTimeoutMs?: number;
 }
 
