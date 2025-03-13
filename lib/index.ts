@@ -577,6 +577,7 @@ export class Stagehand {
         this.browserbaseSessionCreateParams,
         this.browserbaseSessionID,
         this.localBrowserLaunchOptions,
+        this.cdpUrl,
       ).catch((e) => {
         console.error("Error in init:", e);
         const br: BrowserResult = {
